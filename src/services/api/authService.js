@@ -1,4 +1,16 @@
-import usersData from "../mockData/users.json";
+// In-memory user storage (replace with ApperClient database integration in production)
+let usersData = [
+  {
+    Id: 1,
+    email: "demo@example.com",
+    firstName: "Demo",
+    lastName: "User",
+    password: "5f4dcc3b5aa765d61d8327deb882cf99", // hashed "password"
+    phone: "",
+    addresses: [],
+    createdAt: new Date().toISOString()
+  }
+];
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
