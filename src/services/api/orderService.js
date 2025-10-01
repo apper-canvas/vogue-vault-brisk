@@ -24,7 +24,7 @@ const saveOrders = (orders) => {
 };
 
 const orderService = {
-  createOrder: async (orderData) => {
+createOrder: async (orderData) => {
     await delay(400);
     
     const currentUser = authService.getCurrentUser();
@@ -44,6 +44,8 @@ const orderService = {
       tax: orderData.tax,
       total: orderData.total,
       shippingAddress: orderData.shippingAddress,
+      paymentMethod: orderData.paymentMethod || "Credit Card",
+      transactionId: orderData.transactionId || null,
       status: "Processing",
       createdAt: new Date().toISOString()
     };

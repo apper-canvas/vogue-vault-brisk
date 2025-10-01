@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import ApperIcon from "@/components/ApperIcon";
@@ -12,7 +12,9 @@ const CheckoutPage = () => {
   const navigate = useNavigate();
   const { cart, getCartTotal, clearCart } = useCart();
   const { user } = useAuth();
-  const [step, setStep] = useState(1);
+const [step, setStep] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [paymentUrl, setPaymentUrl] = useState(null);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -27,8 +29,16 @@ const CheckoutPage = () => {
 
   const subtotal = getCartTotal();
   const shipping = subtotal > 100 ? 0 : 10;
-  const tax = subtotal * 0.08;
+const tax = subtotal * 0.08;
   const total = subtotal + shipping + tax;
+
+  const { ApperClient } = window.ApperSDK || {};
+
+  useEffect(() => {
+    if (paymentUrl) {
+      window.location.href = paymentUrl;
+    }
+  }, [paymentUrl]);
 
   const handleInputChange = (e) => {
     setFormData({
@@ -50,32 +60,81 @@ const handleSubmit = async (e) => {
       }
       
       setStep(2);
+    } else if (step === 2) {
+      setStep(3);
     } else {
       try {
+        setLoading(true);
+
+        if (!ApperClient) {
+          toast.error("Payment system not initialized. Please refresh the page.");
+          setLoading(false);
+          return;
+        }
+
+        const apperClient = new ApperClient({
+          apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+          apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+        });
+
         const orderData = {
           items: cart,
           subtotal,
           shipping,
           tax,
           total,
-          shippingAddress: formData
+          shippingAddress: formData,
+          returnUrl: window.location.origin,
+          cancelUrl: window.location.origin
         };
 
-        if (user) {
-          await orderService.createOrder(orderData);
+        const result = await apperClient.functions.invoke(
+          import.meta.env.VITE_PROCESS_PAYPAL_PAYMENT,
+          {
+            body: JSON.stringify(orderData),
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+
+        const responseData = await result.json();
+
+        if (responseData.success === false) {
+          console.info(`apper_info: An error was received in this function: ${import.meta.env.VITE_PROCESS_PAYPAL_PAYMENT}. The response body is: ${JSON.stringify(responseData)}.`);
+          toast.error(responseData.error || "Payment processing failed. Please try again.");
+          setLoading(false);
+          return;
         }
 
-        const orderId = `VO${Date.now().toString().slice(-8)}`;
-        clearCart();
-        toast.success("Order placed successfully!");
-        
-        if (user) {
-          navigate("/orders");
+        if (responseData.approvalUrl) {
+          const orderRecord = {
+            items: cart,
+            subtotal,
+            shipping,
+            tax,
+            total,
+            shippingAddress: formData,
+            paymentMethod: "PayPal",
+            transactionId: responseData.orderId
+          };
+
+          if (user) {
+            await orderService.createOrder(orderRecord);
+          }
+
+          localStorage.setItem('pendingOrder', JSON.stringify(orderRecord));
+          
+          setPaymentUrl(responseData.approvalUrl);
         } else {
-          navigate("/", { state: { orderId } });
+          toast.error("Payment approval URL not received. Please try again.");
+          setLoading(false);
         }
+
       } catch (error) {
-        toast.error("Failed to process order. Please try again.");
+        console.info(`apper_info: An error was received in this function: ${import.meta.env.VITE_PROCESS_PAYPAL_PAYMENT}. The error is: ${error.message}`);
+        toast.error("Failed to process payment. Please try again.");
+        setLoading(false);
       }
     }
   };
@@ -285,21 +344,43 @@ const handleSubmit = async (e) => {
                 </div>
               )}
 
-              <div className="flex gap-4 mt-8">
-                {step === 2 && (
+<div className="flex gap-4 mt-8">
+                {step > 1 && (
                   <Button
                     type="button"
                     variant="secondary"
-                    onClick={() => setStep(1)}
+                    onClick={() => setStep(step - 1)}
                     className="flex-1"
+                    disabled={loading}
                   >
                     <ApperIcon name="ArrowLeft" size={20} />
                     Back
                   </Button>
                 )}
-                <Button type="submit" variant="primary" className="flex-1">
-                  {step === 1 ? "Continue to Review" : "Place Order"}
-                  <ApperIcon name="ArrowRight" size={20} />
+                <Button 
+                  type="submit" 
+                  variant="primary" 
+                  className="flex-1"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    "Processing..."
+                  ) : step === 1 ? (
+                    <>
+                      Continue to Review
+                      <ApperIcon name="ArrowRight" size={20} />
+                    </>
+                  ) : step === 2 ? (
+                    <>
+                      Continue to Payment
+                      <ApperIcon name="ArrowRight" size={20} />
+                    </>
+                  ) : (
+                    <>
+                      Pay with PayPal
+                      <ApperIcon name="CreditCard" size={20} />
+                    </>
+                  )}
                 </Button>
               </div>
             </form>

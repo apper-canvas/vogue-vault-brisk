@@ -7,6 +7,7 @@ import CategoryPage from "@/components/pages/CategoryPage";
 import ProductDetailPage from "@/components/pages/ProductDetailPage";
 import CartPage from "@/components/pages/CartPage";
 import CheckoutPage from "@/components/pages/CheckoutPage";
+import PaymentSuccessPage from "@/components/pages/PaymentSuccessPage";
 import WishlistPage from "@/components/pages/WishlistPage";
 import LoginPage from "@/components/pages/LoginPage";
 import RegisterPage from "@/components/pages/RegisterPage";
@@ -26,6 +27,7 @@ function App() {
             <Route path="/product/:id" element={<ProductDetailPage />} />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/payment-success" element={<PaymentSuccessPage />} />
             <Route path="/wishlist" element={<WishlistPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
