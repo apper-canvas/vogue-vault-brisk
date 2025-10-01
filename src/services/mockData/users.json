@@ -1,0 +1,46 @@
+[
+  {
+    "Id": 1,
+    "email": "john.doe@example.com",
+    "password": "am9obl9kb2UxMjN2b2d1ZV92YXVsdF9zYWx0",
+    "firstName": "John",
+    "lastName": "Doe",
+    "phone": "+1 (555) 123-4567",
+    "addresses": [
+      {
+        "Id": 1,
+        "firstName": "John",
+        "lastName": "Doe",
+        "address": "123 Fashion Ave",
+        "city": "New York",
+        "state": "NY",
+        "zipCode": "10001",
+        "country": "United States",
+        "isDefault": true
+      }
+    ],
+    "createdAt": "2024-01-15T10:30:00.000Z"
+  },
+  {
+    "Id": 2,
+    "email": "jane.smith@example.com",
+    "password": "amFuZV9zbWl0aDQ1NnZvZ3VlX3ZhdWx0X3NhbHQ=",
+    "firstName": "Jane",
+    "lastName": "Smith",
+    "phone": "+1 (555) 987-6543",
+    "addresses": [
+      {
+        "Id": 2,
+        "firstName": "Jane",
+        "lastName": "Smith",
+        "address": "456 Style Street",
+        "city": "Los Angeles",
+        "state": "CA",
+        "zipCode": "90001",
+        "country": "United States",
+        "isDefault": true
+      }
+    ],
+    "createdAt": "2024-02-20T14:45:00.000Z"
+  }
+]

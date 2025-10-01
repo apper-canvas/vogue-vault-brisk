@@ -1,0 +1,67 @@
+@import "react-toastify/dist/ReactToastify.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Inter", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #fafafa;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Playfair Display", serif;
+}
+
+.Toastify__toast-container {
+  top: 1rem;
+  right: 1rem;
+  width: auto;
+  max-width: 400px;
+}
+
+.Toastify__toast {
+  padding: 1rem 1.5rem;
+  border-radius: 0.5rem;
+  font-family: "Inter", sans-serif;
+  font-size: 0.875rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.Toastify__toast--success {
+  background-color: #2d6a4f;
+}
+
+.Toastify__toast--error {
+  background-color: #c1121f;
+}
+
+.Toastify__toast--warning {
+  background-color: #f77f00;
+}
+
+.Toastify__toast--info {
+  background-color: #4a5568;
+}
+
+.Toastify__progress-bar {
+  height: 3px;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+}
