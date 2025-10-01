@@ -101,7 +101,7 @@ const Header = () => {
                 )}
               </button>
 
-              <div className="relative hidden lg:block">
+<div className="relative hidden lg:block">
                 <button
                   onClick={() => setAccountDropdownOpen(!accountDropdownOpen)}
                   className="p-2 text-primary hover:text-accent transition-colors duration-200"
@@ -247,7 +247,7 @@ const Header = () => {
                   ))}
                 </nav>
 
-                <div className="mt-8 pt-8 border-t border-secondary space-y-4">
+<div className="mt-8 pt-8 border-t border-secondary space-y-4">
                   {user ? (
                     <>
                       <div className="px-4 py-2 bg-secondary rounded-lg">

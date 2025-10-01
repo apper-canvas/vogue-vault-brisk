@@ -15,7 +15,7 @@ const ProfilePage = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({
+const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
     email: "",
@@ -30,7 +30,7 @@ const ProfilePage = () => {
     try {
       setLoading(true);
       setError(null);
-      const userProfile = await userService.getProfile();
+const userProfile = await userService.getProfile();
       setProfile(userProfile);
       setFormData({
         firstName: userProfile.firstName || "",
@@ -56,7 +56,7 @@ const ProfilePage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.firstName || !formData.lastName || !formData.email) {
+if (!formData.firstName || !formData.lastName || !formData.email) {
       toast.error("Please fill in all required fields");
       return;
     }
@@ -64,7 +64,7 @@ const ProfilePage = () => {
     setSaving(true);
 
     try {
-      const updatedProfile = await userService.updateProfile(formData);
+const updatedProfile = await userService.updateProfile(formData);
       setProfile(updatedProfile);
       setIsEditing(false);
       toast.success("Profile updated successfully!");
@@ -76,7 +76,7 @@ const ProfilePage = () => {
   };
 
   const handleCancel = () => {
-    setFormData({
+setFormData({
       firstName: profile.firstName || "",
       lastName: profile.lastName || "",
       email: profile.email || "",
@@ -116,7 +116,7 @@ const ProfilePage = () => {
                   <label className="text-sm text-primary/60 block mb-2">
                     First Name
                   </label>
-                  <p className="text-lg font-medium text-primary">
+<p className="text-lg font-medium text-primary">
                     {profile.firstName}
                   </p>
                 </div>
@@ -125,7 +125,7 @@ const ProfilePage = () => {
                     Last Name
                   </label>
                   <p className="text-lg font-medium text-primary">
-                    {profile.lastName}
+{profile.lastName}
                   </p>
                 </div>
               </div>
@@ -134,7 +134,7 @@ const ProfilePage = () => {
                 <label className="text-sm text-primary/60 block mb-2">
                   Email
                 </label>
-                <p className="text-lg font-medium text-primary">
+<p className="text-lg font-medium text-primary">
                   {profile.email}
                 </p>
               </div>
@@ -143,12 +143,12 @@ const ProfilePage = () => {
                 <label className="text-sm text-primary/60 block mb-2">
                   Phone
                 </label>
-                <p className="text-lg font-medium text-primary">
+<p className="text-lg font-medium text-primary">
                   {profile.phone || "Not provided"}
                 </p>
               </div>
 
-              {profile.addresses && profile.addresses.length > 0 && (
+{profile.addresses && profile.addresses.length > 0 && (
                 <div>
                   <label className="text-sm text-primary/60 block mb-3">
                     Saved Addresses
@@ -184,7 +184,7 @@ const ProfilePage = () => {
 
               <div className="pt-4 border-t border-secondary">
                 <p className="text-sm text-primary/60">
-                  Member since{" "}
+Member since{" "}
                   {new Date(profile.createdAt).toLocaleDateString("en-US", {
                     year: "numeric",
                     month: "long",
@@ -200,7 +200,7 @@ const ProfilePage = () => {
                   label="First Name"
                   type="text"
                   name="firstName"
-                  value={formData.firstName}
+value={formData.firstName}
                   onChange={handleInputChange}
                   required
                 />
@@ -208,7 +208,7 @@ const ProfilePage = () => {
                   label="Last Name"
                   type="text"
                   name="lastName"
-                  value={formData.lastName}
+value={formData.lastName}
                   onChange={handleInputChange}
                   required
                 />
@@ -217,7 +217,7 @@ const ProfilePage = () => {
               <Input
                 label="Email"
                 type="email"
-                name="email"
+name="email"
                 value={formData.email}
                 onChange={handleInputChange}
                 disabled
@@ -227,7 +227,7 @@ const ProfilePage = () => {
               <Input
                 label="Phone"
                 type="tel"
-                name="phone"
+name="phone"
                 value={formData.phone}
                 onChange={handleInputChange}
                 placeholder="Enter your phone number"

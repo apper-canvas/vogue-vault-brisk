@@ -1,47 +1,207 @@
-import productsData from "../mockData/products.json";
+const getApperClient = () => {
+  const { ApperClient } = window.ApperSDK;
+  return new ApperClient({
+    apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+    apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+  });
+};
 
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const transformProduct = (data) => {
+  return {
+    Id: data.Id,
+    name: data.name_c,
+    category: data.category_c,
+    subcategory: data.subcategory_c,
+    price: data.price_c,
+    images: data.images_c ? JSON.parse(data.images_c) : [],
+    sizes: data.sizes_c ? JSON.parse(data.sizes_c) : [],
+    colors: data.colors_c ? JSON.parse(data.colors_c) : [],
+    description: data.description_c,
+    inStock: data.in_stock_c,
+    stockCount: data.stock_count_c,
+    featured: data.featured_c,
+    trending: data.trending_c
+  };
+};
+
+const getProductFields = () => [
+  { field: { Name: "Id" } },
+  { field: { Name: "name_c" } },
+  { field: { Name: "category_c" } },
+  { field: { Name: "subcategory_c" } },
+  { field: { Name: "price_c" } },
+  { field: { Name: "images_c" } },
+  { field: { Name: "sizes_c" } },
+  { field: { Name: "colors_c" } },
+  { field: { Name: "description_c" } },
+  { field: { Name: "in_stock_c" } },
+  { field: { Name: "stock_count_c" } },
+  { field: { Name: "featured_c" } },
+  { field: { Name: "trending_c" } }
+];
 
 const productService = {
   getAll: async () => {
-    await delay(300);
-    return [...productsData];
+    const apperClient = getApperClient();
+
+    const params = {
+      fields: getProductFields(),
+      pagingInfo: { limit: 100, offset: 0 }
+    };
+
+    const response = await apperClient.fetchRecords("product_c", params);
+
+    if (!response.success) {
+      throw new Error(response.message || "Failed to fetch products");
+    }
+
+    return (response.data || []).map(transformProduct);
   },
 
   getById: async (id) => {
-    await delay(200);
-    const product = productsData.find((p) => p.Id === parseInt(id));
-    if (!product) {
+    const apperClient = getApperClient();
+
+    const params = {
+      fields: getProductFields()
+    };
+
+    const response = await apperClient.getRecordById("product_c", parseInt(id), params);
+
+    if (!response.success) {
+      throw new Error(response.message || "Failed to fetch product");
+    }
+
+    if (!response.data) {
       throw new Error("Product not found");
     }
-    return { ...product };
+
+    return transformProduct(response.data);
   },
 
   getByCategory: async (category) => {
-    await delay(300);
-    return productsData.filter((p) => p.category === category);
+    const apperClient = getApperClient();
+
+    const params = {
+      fields: getProductFields(),
+      where: [
+        {
+          FieldName: "category_c",
+          Operator: "EqualTo",
+          Values: [category],
+          Include: true
+        }
+      ],
+      pagingInfo: { limit: 100, offset: 0 }
+    };
+
+    const response = await apperClient.fetchRecords("product_c", params);
+
+    if (!response.success) {
+      throw new Error(response.message || "Failed to fetch products by category");
+    }
+
+    return (response.data || []).map(transformProduct);
   },
 
   getFeatured: async () => {
-    await delay(300);
-    return productsData.filter((p) => p.featured);
+    const apperClient = getApperClient();
+
+    const params = {
+      fields: getProductFields(),
+      where: [
+        {
+          FieldName: "featured_c",
+          Operator: "EqualTo",
+          Values: [true],
+          Include: true
+        }
+      ],
+      pagingInfo: { limit: 100, offset: 0 }
+    };
+
+    const response = await apperClient.fetchRecords("product_c", params);
+
+    if (!response.success) {
+      throw new Error(response.message || "Failed to fetch featured products");
+    }
+
+    return (response.data || []).map(transformProduct);
   },
 
   getTrending: async () => {
-    await delay(300);
-    return productsData.filter((p) => p.trending);
+    const apperClient = getApperClient();
+
+    const params = {
+      fields: getProductFields(),
+      where: [
+        {
+          FieldName: "trending_c",
+          Operator: "EqualTo",
+          Values: [true],
+          Include: true
+        }
+      ],
+      pagingInfo: { limit: 100, offset: 0 }
+    };
+
+    const response = await apperClient.fetchRecords("product_c", params);
+
+    if (!response.success) {
+      throw new Error(response.message || "Failed to fetch trending products");
+    }
+
+    return (response.data || []).map(transformProduct);
   },
 
   search: async (query) => {
-    await delay(300);
-    const lowerQuery = query.toLowerCase();
-    return productsData.filter(
-      (p) =>
-        p.name.toLowerCase().includes(lowerQuery) ||
-        p.category.toLowerCase().includes(lowerQuery) ||
-        p.description.toLowerCase().includes(lowerQuery)
-    );
+    const apperClient = getApperClient();
+
+    const params = {
+      fields: getProductFields(),
+      whereGroups: [
+        {
+          operator: "OR",
+          subGroups: [
+            {
+              conditions: [
+                {
+                  fieldName: "name_c",
+                  operator: "Contains",
+                  values: [query]
+                }
+              ]
+            },
+            {
+              conditions: [
+                {
+                  fieldName: "category_c",
+                  operator: "Contains",
+                  values: [query]
+                }
+              ]
+            },
+            {
+              conditions: [
+                {
+                  fieldName: "description_c",
+                  operator: "Contains",
+                  values: [query]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      pagingInfo: { limit: 50, offset: 0 }
+    };
+
+    const response = await apperClient.fetchRecords("product_c", params);
+
+    if (!response.success) {
+      throw new Error(response.message || "Failed to search products");
+    }
+
+    return (response.data || []).map(transformProduct);
   }
 };
-
 export default productService;

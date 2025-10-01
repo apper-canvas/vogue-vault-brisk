@@ -1,94 +1,159 @@
-import ordersData from "../mockData/orders.json";
 import authService from "./authService";
 
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
-const ORDER_STORAGE_KEY = "vogue_vault_orders";
-
-const getStoredOrders = () => {
-  try {
-    const stored = localStorage.getItem(ORDER_STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [...ordersData];
-  } catch (error) {
-    console.error("Error reading orders from localStorage:", error);
-    return [...ordersData];
-  }
+const getApperClient = () => {
+  const { ApperClient } = window.ApperSDK;
+  return new ApperClient({
+    apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+    apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+  });
 };
 
-const saveOrders = (orders) => {
-  try {
-    localStorage.setItem(ORDER_STORAGE_KEY, JSON.stringify(orders));
-  } catch (error) {
-    console.error("Error saving orders to localStorage:", error);
-  }
+const getOrderFields = () => [
+  { field: { Name: "Id" } },
+  { field: { Name: "order_number_c" } },
+  { field: { Name: "items_c" } },
+  { field: { Name: "subtotal_c" } },
+  { field: { Name: "shipping_c" } },
+  { field: { Name: "tax_c" } },
+  { field: { Name: "total_c" } },
+  { field: { Name: "shipping_address_c" } },
+  { field: { Name: "status_c" } },
+  { field: { Name: "created_at_c" } },
+  { field: { Name: "payment_method_c" } },
+  { field: { Name: "transaction_id_c" } },
+  { field: { Name: "user_id_c" } }
+];
+
+const transformOrder = (data) => {
+  return {
+    Id: data.Id,
+    userId: data.user_id_c?.Id || data.user_id_c,
+    orderNumber: data.order_number_c,
+    items: data.items_c ? JSON.parse(data.items_c) : [],
+    subtotal: data.subtotal_c,
+    shipping: data.shipping_c,
+    tax: data.tax_c,
+    total: data.total_c,
+    shippingAddress: data.shipping_address_c ? JSON.parse(data.shipping_address_c) : {},
+    paymentMethod: data.payment_method_c,
+    transactionId: data.transaction_id_c,
+    status: data.status_c,
+    createdAt: data.created_at_c
+  };
 };
 
 const orderService = {
-createOrder: async (orderData) => {
-    await delay(400);
-    
+  createOrder: async (orderData) => {
     const currentUser = authService.getCurrentUser();
     if (!currentUser) {
       throw new Error("User not authenticated");
     }
-    
-    const orders = getStoredOrders();
-    
-    const newOrder = {
-      Id: Math.max(...orders.map((o) => o.Id), 0) + 1,
-      userId: currentUser.Id,
-      orderNumber: `VO${Date.now().toString().slice(-8)}`,
-      items: orderData.items,
-      subtotal: orderData.subtotal,
-      shipping: orderData.shipping,
-      tax: orderData.tax,
-      total: orderData.total,
-      shippingAddress: orderData.shippingAddress,
-      paymentMethod: orderData.paymentMethod || "Credit Card",
-      transactionId: orderData.transactionId || null,
-      status: "Processing",
-      createdAt: new Date().toISOString()
+
+    const apperClient = getApperClient();
+
+    const orderRecord = {
+      order_number_c: `VO${Date.now().toString().slice(-8)}`,
+      items_c: JSON.stringify(orderData.items),
+      subtotal_c: orderData.subtotal,
+      shipping_c: orderData.shipping,
+      tax_c: orderData.tax,
+      total_c: orderData.total,
+      shipping_address_c: JSON.stringify(orderData.shippingAddress),
+      status_c: "Processing",
+      created_at_c: new Date().toISOString(),
+      payment_method_c: orderData.paymentMethod || "Credit Card",
+      transaction_id_c: orderData.transactionId || null,
+      user_id_c: currentUser.Id
     };
-    
-    orders.push(newOrder);
-    saveOrders(orders);
-    
-    return newOrder;
+
+    const params = {
+      records: [orderRecord]
+    };
+
+    const response = await apperClient.createRecord("order_c", params);
+
+    if (!response.success) {
+      throw new Error(response.message || "Failed to create order");
+    }
+
+    if (response.results) {
+      const failed = response.results.filter(r => !r.success);
+      if (failed.length > 0) {
+        const errorMsg = failed[0].message || "Failed to create order";
+        throw new Error(errorMsg);
+      }
+
+      return transformOrder(response.results[0].data);
+    }
+
+    throw new Error("Order creation failed");
   },
 
   getUserOrders: async () => {
-    await delay(300);
-    
     const currentUser = authService.getCurrentUser();
     if (!currentUser) {
       throw new Error("User not authenticated");
     }
-    
-    const orders = getStoredOrders();
-    return orders
-      .filter((order) => order.userId === currentUser.Id)
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    const apperClient = getApperClient();
+
+    const params = {
+      fields: getOrderFields(),
+      where: [
+        {
+          FieldName: "user_id_c",
+          Operator: "EqualTo",
+          Values: [currentUser.Id],
+          Include: true
+        }
+      ],
+      orderBy: [
+        {
+          fieldName: "created_at_c",
+          sorttype: "DESC"
+        }
+      ],
+      pagingInfo: { limit: 100, offset: 0 }
+    };
+
+    const response = await apperClient.fetchRecords("order_c", params);
+
+    if (!response.success) {
+      throw new Error(response.message || "Failed to fetch orders");
+    }
+
+    return (response.data || []).map(transformOrder);
   },
 
   getOrderById: async (orderId) => {
-    await delay(200);
-    
     const currentUser = authService.getCurrentUser();
     if (!currentUser) {
       throw new Error("User not authenticated");
     }
-    
-    const orders = getStoredOrders();
-    const order = orders.find(
-      (o) => o.Id === parseInt(orderId) && o.userId === currentUser.Id
-    );
-    
-    if (!order) {
+
+    const apperClient = getApperClient();
+
+    const params = {
+      fields: getOrderFields()
+    };
+
+    const response = await apperClient.getRecordById("order_c", parseInt(orderId), params);
+
+    if (!response.success) {
+      throw new Error(response.message || "Failed to fetch order");
+    }
+
+    if (!response.data) {
       throw new Error("Order not found");
     }
-    
+
+    const order = transformOrder(response.data);
+
+    if (order.userId !== currentUser.Id) {
+      throw new Error("Order not found");
+    }
+
     return order;
   }
 };
-
 export default orderService;

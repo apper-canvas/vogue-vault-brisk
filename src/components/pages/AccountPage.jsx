@@ -23,7 +23,7 @@ const AccountPage = () => {
     try {
       setLoading(true);
       setError(null);
-      const userOrders = await orderService.getUserOrders();
+const userOrders = await orderService.getUserOrders();
       setOrders(userOrders.slice(0, 3));
     } catch (err) {
       setError(err.message);
@@ -49,7 +49,7 @@ const AccountPage = () => {
             My Account
           </h1>
           <p className="text-primary/60">
-            Welcome back, {user?.firstName || "Valued Customer"}!
+Welcome back, {user?.firstName || "Valued Customer"}!
           </p>
         </div>
 
@@ -84,22 +84,22 @@ const AccountPage = () => {
                 <div className="space-y-4">
                   {orders.map((order) => (
                     <Link
-                      key={order.Id}
+key={order.Id}
                       to={`/orders`}
                       className="block border border-secondary rounded-lg p-4 hover:border-accent transition-colors duration-200"
                     >
                       <div className="flex items-center justify-between mb-3">
                         <div>
-                          <p className="font-semibold text-primary">
+<p className="font-semibold text-primary">
                             Order #{order.orderNumber}
                           </p>
-                          <p className="text-sm text-primary/60">
+<p className="text-sm text-primary/60">
                             {new Date(order.createdAt).toLocaleDateString()}
                           </p>
                         </div>
                         <Badge
                           variant={
-                            order.status === "Delivered"
+order.status === "Delivered"
                               ? "success"
                               : order.status === "Shipped"
                               ? "info"
@@ -110,11 +110,11 @@ const AccountPage = () => {
                         </Badge>
                       </div>
                       <div className="flex items-center justify-between">
-                        <p className="text-primary/60">
+<p className="text-primary/60">
                           {order.items.length} item(s)
                         </p>
                         <p className="font-semibold text-accent">
-                          ${order.total.toFixed(2)}
+${order.total.toFixed(2)}
                         </p>
                       </div>
                     </Link>
@@ -133,17 +133,17 @@ const AccountPage = () => {
                 <div>
                   <p className="text-sm">Name</p>
                   <p className="font-medium text-primary">
-                    {user?.firstName} {user?.lastName}
+{user?.firstName} {user?.lastName}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm">Email</p>
-                  <p className="font-medium text-primary">{user?.email}</p>
+<p className="font-medium text-primary">{user?.email}</p>
                 </div>
                 {user?.phone && (
-                  <div>
+<div>
                     <p className="text-sm">Phone</p>
-                    <p className="font-medium text-primary">{user.phone}</p>
+                    <p className="font-medium text-primary">{user?.phone || "Not provided"}</p>
                   </div>
                 )}
               </div>

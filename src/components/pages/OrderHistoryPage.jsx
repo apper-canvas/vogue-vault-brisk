@@ -21,7 +21,7 @@ const OrderHistoryPage = () => {
     try {
       setLoading(true);
       setError(null);
-      const userOrders = await orderService.getUserOrders();
+const userOrders = await orderService.getUserOrders();
       setOrders(userOrders);
     } catch (err) {
       setError(err.message);
@@ -64,18 +64,18 @@ const OrderHistoryPage = () => {
 
         <div className="space-y-4">
           {orders.map((order) => (
-            <div key={order.Id} className="bg-white rounded-lg shadow-sm">
+<div key={order.Id} className="bg-white rounded-lg shadow-sm">
               <div
                 className="p-6 cursor-pointer"
-                onClick={() => toggleOrderDetails(order.Id)}
+onClick={() => toggleOrderDetails(order.Id)}
               >
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <h3 className="text-xl font-display font-bold text-primary">
+<h3 className="text-xl font-display font-bold text-primary">
                       Order #{order.orderNumber}
                     </h3>
                     <p className="text-primary/60">
-                      {new Date(order.createdAt).toLocaleDateString("en-US", {
+{new Date(order.createdAt).toLocaleDateString("en-US", {
                         year: "numeric",
                         month: "long",
                         day: "numeric"
@@ -85,7 +85,7 @@ const OrderHistoryPage = () => {
                   <div className="flex items-center gap-4">
                     <Badge
                       variant={
-                        order.status === "Delivered"
+order.status === "Delivered"
                           ? "success"
                           : order.status === "Shipped"
                           ? "info"
@@ -95,7 +95,7 @@ const OrderHistoryPage = () => {
                       {order.status}
                     </Badge>
                     <ApperIcon
-                      name={expandedOrder === order.Id ? "ChevronUp" : "ChevronDown"}
+name={expandedOrder === order.Id ? "ChevronUp" : "ChevronDown"}
                       size={20}
                       className="text-primary/60"
                     />
@@ -104,15 +104,15 @@ const OrderHistoryPage = () => {
 
                 <div className="flex items-center justify-between">
                   <p className="text-primary/60">
-                    {order.items.length} item(s)
+{order.items.length} item(s)
                   </p>
                   <p className="text-2xl font-display font-bold text-accent">
-                    ${order.total.toFixed(2)}
+${order.total.toFixed(2)}
                   </p>
                 </div>
               </div>
 
-              {expandedOrder === order.Id && (
+{expandedOrder === order.Id && (
                 <div className="border-t border-secondary p-6">
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-6">
                     <div>
@@ -121,7 +121,7 @@ const OrderHistoryPage = () => {
                       </h4>
                       <div className="text-primary/60">
                         <p>
-                          {order.shippingAddress.firstName}{" "}
+{order.shippingAddress.firstName}{" "}
                           {order.shippingAddress.lastName}
                         </p>
                         <p>{order.shippingAddress.address}</p>
@@ -141,23 +141,23 @@ const OrderHistoryPage = () => {
                       <div className="space-y-2 text-primary/60">
                         <div className="flex justify-between">
                           <span>Subtotal</span>
-                          <span>${order.subtotal.toFixed(2)}</span>
+<span>${order.subtotal.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between">
                           <span>Shipping</span>
-                          <span>
+<span>
                             {order.shipping === 0
                               ? "FREE"
                               : `$${order.shipping.toFixed(2)}`}
                           </span>
                         </div>
                         <div className="flex justify-between">
-                          <span>Tax</span>
+<span>Tax</span>
                           <span>${order.tax.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between font-semibold text-primary text-lg pt-2 border-t border-secondary">
                           <span>Total</span>
-                          <span className="text-accent">
+<span className="text-accent">
                             ${order.total.toFixed(2)}
                           </span>
                         </div>
@@ -170,7 +170,7 @@ const OrderHistoryPage = () => {
                       Order Items
                     </h4>
                     <div className="space-y-4">
-                      {order.items.map((item, index) => (
+{order.items.map((item, index) => (
                         <div
                           key={`${item.productId}-${index}`}
                           className="flex gap-4 border border-secondary rounded-lg p-4"
