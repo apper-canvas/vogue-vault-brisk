@@ -13,7 +13,11 @@ const transformProduct = (data) => {
     category: data.category_c,
     subcategory: data.subcategory_c,
     price: data.price_c,
-    images: data.images_c ? JSON.parse(data.images_c) : [],
+images: data.images_c 
+      ? (data.images_c.trim().startsWith('[') || data.images_c.trim().startsWith('{')
+          ? JSON.parse(data.images_c)
+          : [data.images_c])
+      : [],
     sizes: data.sizes_c ? JSON.parse(data.sizes_c) : [],
     colors: data.colors_c ? JSON.parse(data.colors_c) : [],
     description: data.description_c,
